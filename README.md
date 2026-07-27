@@ -12,7 +12,7 @@ Running `pip freeze` often reveals a massive list of third-party modules. Over t
 You can run it directly from your terminal inside any active Python project without downloading or installing a package:
 
 ```bash
-curl -sSL https://githubusercontent.com | python3
+curl -sSL https://github.com/JithunMethusahan/pip-clean | python3
 ```
 
 *(Alternatively, download `pip_clean.py` into your project directory and run `python pip_clean.py` manually).*
