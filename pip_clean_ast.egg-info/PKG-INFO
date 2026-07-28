@@ -1,3 +1,14 @@
+Metadata-Version: 2.4
+Name: pip-clean-ast
+Version: 1.0.0
+Summary: A zero-dependency Python utility to safely purge unused virtualenv packages using AST parsing.
+Author: Jithun Methusahan
+License: MIT
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+
 # 🧹 pip-clean
 
 A zero-dependency, single-file Python micro-utility that scans your codebase, identifies "ghost" dependencies that are installed but never imported, and cleans them up interactively.

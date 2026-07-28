@@ -1,0 +1,9 @@
+README.md
+pyproject.toml
+pip_clean/__init__.py
+pip_clean/core.py
+pip_clean_ast.egg-info/PKG-INFO
+pip_clean_ast.egg-info/SOURCES.txt
+pip_clean_ast.egg-info/dependency_links.txt
+pip_clean_ast.egg-info/entry_points.txt
+pip_clean_ast.egg-info/top_level.txt
