@@ -13,7 +13,7 @@ Running `pip freeze` often reveals a massive list of third-party modules. Over t
 Ensure your local virtual environment is active, then install the utility natively straight from GitHub via pip:
 
 ```bash
-pip install git+https://github.com
+pip install git+pip install git+https://github.com/JithunMethusahan/pip-clean
 ```
 
 ### 🚀 Usage
