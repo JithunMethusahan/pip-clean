@@ -8,7 +8,7 @@ Running `pip freeze` often reveals a massive list of third-party modules. Over t
 ### How it Works
 `pip-clean` scans your local workspace using Python's built-in Abstract Syntax Tree (`ast`) parser. It maps actual import footprints against `pip list`, filters out essential dev tooling, and cleanly removes the anomalies.
 
-### Quick Start (No Installation Needed)
+### Quick Start 
 
 Ensure your local virtual environment is active, then install the utility natively straight from GitHub via pip:
 
