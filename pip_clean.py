@@ -17,10 +17,14 @@ IMPORT_TO_PKG_MAP = {
     "telegram": "python-telegram-bot",
 }
 
+def is_virtual_environment():
+    """Returns True if the script is running inside a virtual environment."""
+    return (hasattr(sys, 'real_prefix') or 
+            (getattr(sys, 'base_prefix', sys.prefix) != sys.prefix))
+
 def get_installed_packages():
     """Gets a list of all packages installed in the current environment."""
     try:
-        # Run pip list formatted as freeze to easily parse names
         result = subprocess.run(
             [sys.executable, "-m", "pip", "list", "--format=freeze"],
             capture_output=True, text=True, check=True
@@ -28,6 +32,7 @@ def get_installed_packages():
         packages = []
         for line in result.stdout.strip().split("\n"):
             if "==" in line:
+                # Extract package name before '==' and strip whitespace cleanly
                 pkg_name = line.split("==")[0].strip()
                 packages.append(pkg_name.lower())
         return packages
@@ -40,8 +45,7 @@ def extract_imports_from_project():
     imported_libs = set()
     
     for root, _, files in os.walk("."):
-        # Skip virtual environments and build cache directories to avoid false positives
-        if any(ignored in root for ignored in [".venv", "venv", "env", ".git", "__pycache__", "build", "dist"]):
+        if any(ignored in root for ignored in [".venv", "venv", "env", ".git", "__pycache__", "build", "dist", "test_env"]):
             continue
             
         for file in files:
@@ -54,45 +58,71 @@ def extract_imports_from_project():
                     for node in ast.walk(tree):
                         if isinstance(node, ast.Import):
                             for alias in node.names:
-                                # Get top-level module name (e.g., 'os' from 'os.path')
-                                base_mod = alias.name.split('.')[0].lower()
+                                # FIXED: Extract index 0 from split list before lowering string
+                                base_mod = alias.name.split('.')[0].strip().lower()
                                 imported_libs.add(base_mod)
                         elif isinstance(node, ast.ImportFrom):
                             if node.module:
-                                base_mod = node.module.split('.')[0].lower()
+                                # FIXED: Extract index 0 from split list before lowering string
+                                base_mod = node.module.split('.')[0].strip().lower()
                                 imported_libs.add(base_mod)
                 except Exception:
-                    # Silently skip files that fail parsing due to dynamic syntax errors
                     continue
     return imported_libs
 
+def extract_packages_from_requirements():
+    """Extracts explicit top-level declarations from requirements.txt safely."""
+    req_packages = set()
+    if os.path.exists("requirements.txt"):
+        try:
+            with open("requirements.txt", "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#"):
+                        pkg = line
+                        # FIXED: Properly extract name segment using loop substitution safely
+                        for operator in ["==", ">=", "<=", ">", "<", "@"]:
+                            if operator in pkg:
+                                pkg = pkg.split(operator)[0]
+                        req_packages.add(pkg.strip().lower())
+        except Exception as e:
+            print(f"\033[93m⚠️ Warning parsing requirements.txt: {e}\033[0m")
+    return req_packages
+
 def main():
+    if not is_virtual_environment():
+        print("\033[91m❌ ERROR: Global Environment Protected!\033[0m")
+        print("\033[93mpip-clean is designed to safely run ONLY inside a virtual environment (.venv).\033[0m")
+        print("Running this globally could break your core system dependencies.")
+        print("\nPlease activate your virtual environment first:")
+        print(" > test_env\\Scripts\\activate\n")
+        sys.exit(1)
+
     print("\033[94m🔍 Running pip-clean: Scanning codebase for ghost dependencies...\033[0m\n")
     
     installed = get_installed_packages()
     actual_imports = extract_imports_from_project()
+    requirements_pkgs = extract_packages_from_requirements()
     
-    # Map observed syntax imports to their corresponding installation names
     mapped_imports = set()
     for lib in actual_imports:
         mapped_imports.add(lib)
         if lib in IMPORT_TO_PKG_MAP:
             mapped_imports.add(IMPORT_TO_PKG_MAP[lib].lower())
 
-    # NEW: Automatically protect common sub-dependencies of heavy libraries
     sub_dependency_protections = {
-        # Requests dependencies
         "urllib3", "idna", "certifi", "charset-normalizer",
-        # Common database / processing dependencies
         "six", "numpy", "python-dateutil", "typing-extensions"
     }
 
-    # Protect operational environment tools from accidental deletion
     critical_baselines = {"pip", "setuptools", "wheel", "twine", "black", "flake8", "pytest", "uv"}
     
     ghost_packages = []
     for pkg in installed:
-        if pkg not in mapped_imports and pkg not in critical_baselines and pkg not in sub_dependency_protections:
+        if (pkg not in mapped_imports and 
+            pkg not in requirements_pkgs and 
+            pkg not in sub_dependency_protections and
+            pkg not in critical_baselines):
             ghost_packages.append(pkg)
             
     if not ghost_packages:
@@ -118,7 +148,6 @@ def main():
         print("\n\033[92m🎉 Environment successfully cleaned up!\033[0m")
     else:
         print("\n\033[90mOperation canceled. No files or packages were modified.\033[0m")
-    
 
 if __name__ == "__main__":
     main()
