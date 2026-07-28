@@ -9,13 +9,20 @@ Running `pip freeze` often reveals a massive list of third-party modules. Over t
 `pip-clean` scans your local workspace using Python's built-in Abstract Syntax Tree (`ast`) parser. It maps actual import footprints against `pip list`, filters out essential dev tooling, and cleanly removes the anomalies.
 
 ### Quick Start (No Installation Needed)
-You can run it directly from your terminal inside any active Python project without downloading or installing a package:
+
+Ensure your local virtual environment is active, then install the utility natively straight from GitHub via pip:
 
 ```bash
-curl -sSL https://github.com/JithunMethusahan/pip-clean | python3
+pip install git+https://github.com
 ```
 
-*(Alternatively, download `pip_clean.py` into your project directory and run `python pip_clean.py` manually).*
+### 🚀 Usage
+
+Execute the package analyzer loop instantly from absolutely anywhere inside your project workspace:
+
+```bash
+pip-clean
+```
 
 
 ### Key Advantages
