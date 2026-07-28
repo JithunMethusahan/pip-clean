@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pip-clean-ast"
+version = "1.0.0"
+authors = [
+    { name="Jithun Methusahan" }
+]
+description = "A zero-dependency Python utility to safely purge unused virtualenv packages using AST parsing."
+readme = "README.md"
+requires-python = ">=3.7"
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[tool.setuptools]
+# Explicitly force the build engine to only package the code inside pip_clean
+packages = ["pip_clean"]
+
+[project.scripts]
+pip-clean = "pip_clean.core:main"
+    
